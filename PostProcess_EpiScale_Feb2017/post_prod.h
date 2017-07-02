@@ -13,14 +13,15 @@ struct Data {
 	int CellRank;
 	double GrowthProgress;
 	double MembrGrowthProgress;
-	int IsBoundrayCell;
+	int IsBoundaryCell;
 	int NumOfNeighbors;
 	double CellArea;
 	double CellPerim;
-	double CurrentActiveIntnlNode;
-	double CurrentActiveMembrNodes;
-	vector <int> NeighborCells;
-	double CellCenter[2];
+	vector<int> NeighborCellsOrdered;
+    vector<int> NumOfPointsInContactOrdered;
+	int CurrentActiveIntnlNodes;
+	int CurrentActiveMembrNodes;
+	double CellCenter[3];
 
 };
 

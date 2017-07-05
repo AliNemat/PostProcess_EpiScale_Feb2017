@@ -46,8 +46,13 @@ int main()
 
     } //finished reading all the files
 
+    // Computing Cell Area statistical analysis
+    AreaStat* area = new AreaStat();
+    area->add_values(cells);
+    area->calc_Stats();
+    area->display();
 
-	return 0;
+    return 0;
 }
 
 bool parse_File(string FileName, vector<Data*>& cells) {
@@ -55,7 +60,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
 
     ifs.open(FileName.c_str());
 
-    if (!ifs.open()) {
+    if (!ifs.is_open()) {
         cout << FileName << " is not available" << endl;
         //return false because it couldn't read file
         return false;
@@ -94,7 +99,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             ss >> val;
             cell->MembrGrowthProgress = val;
         }
-        else if (temp == "IsBoundaryCell") {
+        else if (temp == "IsBoundrayCell") { //fix later
             ss >> num;
             cell->IsBoundaryCell = num;
         }
@@ -121,6 +126,8 @@ bool parse_File(string FileName, vector<Data*>& cells) {
                 ss >> num;
                 neigh.push_back(num);
             }
+            //at the moment, pushes one too many
+            neigh.pop_back();
             cell->NeighborCellsOrdered = neigh;
         }
         else if (temp == "NumberOfPointsInContactOrdered") {
@@ -134,10 +141,11 @@ bool parse_File(string FileName, vector<Data*>& cells) {
                 ss >> num;
                 points.push_back(num);
             }
+            //at the moment, pushes one too many
+            neigh.pop_back();
             cell->NeighborCellsOrdered = points;
-
         }
-        else if (temp == "CurrentActiveIntnlNodes") {
+        else if (temp == "CurrentActiveIntnlNode") {
             ss >> num;
             cell->CurrentActiveIntnlNodes = num;
         }
@@ -146,7 +154,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             cell->CurrentActiveMembrNodes = num;
         }
         else if (temp == "CellCenter") {
-                
+            //for later
         }
         else {
             //come across some other string

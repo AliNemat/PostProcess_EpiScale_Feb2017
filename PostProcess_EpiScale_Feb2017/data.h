@@ -1,12 +1,7 @@
-
-using namespace std;
-#include <iostream>
-#include <stdlib.h>
+//data.h
+//=====================
 #include <vector>
-#include <fstream>
-#include <string>
-#include <cmath>
-#include <conio.h>
+using namespace std;
 
 struct Data {
 

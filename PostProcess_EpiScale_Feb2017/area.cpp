@@ -1,6 +1,11 @@
 //area.cpp
-
+//====================
+class Data;
+//include dependencies
+#include "data.h"
 #include "area.h"
+#include <fstream>
+//====================
 
 /*****AreaGroup Class*******/
 AreaGroup::AreaGroup(double min, double max) {
@@ -14,10 +19,10 @@ void AreaGroup::add_value(double val) {
     values.push_back(val);
     return;
 }
-void calc_Stats() {
+void AreaGroup::calc_Stats() {
     //first: calculate mean
     double sum = 0;
-    for (int i = 0; i < values.size(); i++) {
+    for (unsigned int i = 0; i < values.size(); i++) {
         sum += values.at(i);
     }
 
@@ -25,14 +30,14 @@ void calc_Stats() {
 
     //second: calc std deviation
     sum = 0;
-    for (int i = 0; i < values.size(); i++) {
+    for (unsigned int i = 0; i < values.size(); i++) {
         sum += pow((values.at(i) - this->mean),2.0);
     }
     this->std_dev = sqrt(sum / (values.size() - 1));
 
     return;
 }
-void display(ofstream& ofs) {
+void AreaGroup::display(ofstream& ofs) {
 
     ofs << "AreaGroup for cell progress: (" << min_prog << ", ";
     ofs << max_prog << ')' << endl;
@@ -45,28 +50,24 @@ void display(ofstream& ofs) {
 }
 
 /*****AreaStat Class********/
-//0.0-0.35, 0.35-0.7, 0.7-0.8, 0.8-0.9, 0.9-0.95, 
-//0.95-0.97, 0.97-0.98, 0.98-0.99, 0.99-1.0 
-
-
 AreaStat::AreaStat() {
-    bounds = {0.35, 0.7. 0.8, 0.9, 0.95, 0.97, 0.98, 0.99, 1.0};
+    this->bounds = {0.35, 0.7, 0.8, 0.9, 0.95, 0.97, 0.98, 0.99, 1.0};
     AreaGroup* ag;
     double low = 0.0;
-    for (int i = 0; i < bounds.size(); i++) {
+    for (unsigned int i = 0; i < bounds.size(); i++) {
          ag = new AreaGroup(low, bounds.at(i));
          groups.push_back(ag);
     }
 }
 void AreaStat::add_values(vector<vector<Data*>>& cells) {
     
-    for (int i = 0; i < cells.size(); i++) {
+    for (unsigned int i = 0; i < cells.size(); i++) {
 
-        for (int j = 0; j < cells.at(i).size(); j++) {
+        for (unsigned int j = 0; j < cells.at(i).size(); j++) {
             double p = cells.at(i).at(j)->GrowthProgress;
             //find correct index for area group by comparing cell progress
             //  with our set boundaries
-            int k = 0;
+            unsigned int k = 0;
             while ( (k < bounds.size()) && (p > bounds.at(k)) ) {
                 k++;
             }
@@ -79,9 +80,9 @@ void AreaStat::add_values(vector<vector<Data*>>& cells) {
     return;
 }
 
-void AreaStat::calcStats() {
+void AreaStat::calc_Stats() {
     
-    for (int i = 0; i < groups.size(); i++) {
+    for (unsigned int i = 0; i < groups.size(); i++) {
         groups.at(i)->calc_Stats();
     }
 
@@ -95,7 +96,7 @@ void AreaStat::display() {
 
     ofs << "Statistical Data for Cell Area" << endl;
 
-    for (int i = 0; i < groups.size(); i++) {
+    for (unsigned int i = 0; i < groups.size(); i++) {
         groups.at(i)->display(ofs);
     }
 

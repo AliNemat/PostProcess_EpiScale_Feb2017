@@ -1,7 +1,16 @@
-# include "post_prod.h"
-  
-using namespace std;
+//main.cpp
+//======================
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <math.h>
+#include "data.h"
+#include "area.h"
 
+using namespace std;
+  
 bool parse_File(string, vector<Data*>&);
 
 int main()
@@ -47,10 +56,10 @@ int main()
     } //finished reading all the files
 
     // Computing Cell Area statistical analysis
-    AreaStat* area = new AreaStat();
-    area->add_values(cells);
-    area->calc_Stats();
-    area->display();
+    AreaStat area;;
+    area.add_values(data);
+    area.calc_Stats();
+    area.display();
 
     return 0;
 }
@@ -73,13 +82,12 @@ bool parse_File(string FileName, vector<Data*>& cells) {
     string temp;
     int num;
     double val;
-    string temp;
     Data* cell;
 
     // while loop to parse one file
     while (getline(ifs, line)); {
         ss.str(line);
-        getline(ss,data_field,':');
+        getline(ss,temp,':');
             
         if(temp == "CellRank") {
             ss >> num;
@@ -142,7 +150,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
                 points.push_back(num);
             }
             //at the moment, pushes one too many
-            neigh.pop_back();
+            points.pop_back();
             cell->NeighborCellsOrdered = points;
         }
         else if (temp == "CurrentActiveIntnlNode") {

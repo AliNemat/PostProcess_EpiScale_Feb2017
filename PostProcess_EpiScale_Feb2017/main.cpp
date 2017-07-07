@@ -24,7 +24,7 @@ int main()
     int digits;
     bool Finished = false;
 
-    for (int Ti = 0; !Finished; Ti++)
+    for (int Ti = 1; !Finished; Ti++)
     {
         digits = ceil(log10(Ti + 1)); 
         if (digits==1 || digits == 0) {
@@ -56,26 +56,25 @@ int main()
     } //finished reading all the files
 
     // Computing Cell Area statistical analysis
-    AreaStat area;;
+    cout << "Compute Area stats" << endl;
+    AreaStat area;
     area.add_values(data);
     area.calc_Stats();
     area.display();
-
+    cout << "Finished with everything" << endl;
     return 0;
 }
 
 bool parse_File(string FileName, vector<Data*>& cells) {
-    ifstream ifs;
+    
+    ifstream ifs(FileName.c_str());
 
-    ifs.open(FileName.c_str());
-
-    if (!ifs.is_open()) {
+    if (!ifs) {
         cout << FileName << " is not available" << endl;
         //return false because it couldn't read file
         return false;
     }
-
-    cout << FileName << " is open" << endl;
+    //cout << FileName << " is good" << endl;
 
     stringstream ss; 
     string line;
@@ -85,12 +84,16 @@ bool parse_File(string FileName, vector<Data*>& cells) {
     Data* cell;
 
     // while loop to parse one file
-    while (getline(ifs, line)); {
+    while (getline(ifs,line)) {
+        //cout << "line: " << line << endl;
         ss.str(line);
         getline(ss,temp,':');
+
+        //cout << "temp: " << temp << endl;
             
         if(temp == "CellRank") {
             ss >> num;
+            //cout << "CellRank: " << num << endl;
             if (num > 0) {
                 //first push_back old cell onto vector
                 cells.push_back(cell);
@@ -99,31 +102,31 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             cell = new Data;
             cell->CellRank = num;
         }
-        else if (temp == "GrowthProgress") {
+        else if (temp == "    GrowthProgress") {
             ss >> val;
             cell->GrowthProgress = val;
         }
-        else if (temp == "MembrGrowthProgress") {
+        else if (temp == "    MembrGrowthProgress") {
             ss >> val;
             cell->MembrGrowthProgress = val;
         }
-        else if (temp == "IsBoundrayCell") { //fix later
+        else if (temp == "    IsBoundrayCell") { //fix later
             ss >> num;
             cell->IsBoundaryCell = num;
         }
-        else if (temp == "NumOfNeighbors") {
+        else if (temp == "    NumOfNeighbors") {
             ss >> num;
             cell->NumOfNeighbors = num;
         }
-        else if (temp == "CellArea") {
+        else if (temp == "    CellArea") {
             ss >> val;
             cell->CellArea = val;
         }
-        else if (temp == "CellPerim") {
+        else if (temp == "    CellPerim") {
             ss >> val;
             cell->CellPerim = val;
         }
-        else if (temp == "NeighborCellsOrdered") {
+        else if (temp == "    NeighborCellsOrdered") {
             vector<int> neigh;
             //throw away the '{' and '}'
             getline(ss,temp,'{');
@@ -138,7 +141,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             neigh.pop_back();
             cell->NeighborCellsOrdered = neigh;
         }
-        else if (temp == "NumberOfPointsInContactOrdered") {
+        else if (temp == "    NumberOfPointsInContactOrdered") {
             vector<int> points;
             //throw away the '{' and '}'
             getline(ss,temp,'{');
@@ -153,26 +156,24 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             points.pop_back();
             cell->NeighborCellsOrdered = points;
         }
-        else if (temp == "CurrentActiveIntnlNode") {
+        else if (temp == "    CurrentActiveIntnlNode") {
             ss >> num;
             cell->CurrentActiveIntnlNodes = num;
         }
-        else if (temp == "CurrentActiveMembrNodes") {
+        else if (temp == "    CurrentActiveMembrNodes") {
             ss >> num;
             cell->CurrentActiveMembrNodes = num;
         }
-        else if (temp == "CellCenter") {
+        else if (temp == "    CellCenter") {
             //for later
-        }
-        else {
-            //come across some other string
-            cout << "Error: Unknown Data Field: " << temp << endl;
         }
 
         //clear stringstream for next input string
         ss.clear();
 
     } //finished reading one file
+
+    ifs.close();
 
     return true;
 }

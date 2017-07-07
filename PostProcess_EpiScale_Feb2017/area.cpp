@@ -5,6 +5,7 @@ class Data;
 #include "data.h"
 #include "area.h"
 #include <fstream>
+#include <iostream>
 //====================
 
 /*****AreaGroup Class*******/
@@ -57,6 +58,7 @@ AreaStat::AreaStat() {
     for (unsigned int i = 0; i < bounds.size(); i++) {
          ag = new AreaGroup(low, bounds.at(i));
          groups.push_back(ag);
+         low = bounds.at(i);
     }
 }
 void AreaStat::add_values(vector<vector<Data*>>& cells) {

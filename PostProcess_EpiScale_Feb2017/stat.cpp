@@ -1,26 +1,24 @@
-//area.cpp
+//stat.cpp
 //====================
-class Data;
+//
 //include dependencies
 #include "data.h"
-#include "area.h"
+#include "stat.h"
 #include <fstream>
 #include <iostream>
 //====================
 
 /*****AreaGroup Class*******/
-AreaGroup::AreaGroup(double min, double max) {
+StatBin::StatBin(double min, double max, string name) {
     this->min_prog = min;
     this->max_prog = max;
+    this->data_field = name;
 }
-double AreaGroup::get_high_end() {
-    return max_prog;
-}
-void AreaGroup::add_value(double val) {
+void StatBin::add_value(double val) {
     values.push_back(val);
     return;
 }
-void AreaGroup::calc_Stats() {
+void StatBin::calc_Stats() {
     //first: calculate mean
     double sum = 0;
     for (unsigned int i = 0; i < values.size(); i++) {
@@ -38,9 +36,9 @@ void AreaGroup::calc_Stats() {
 
     return;
 }
-void AreaGroup::display(ofstream& ofs) {
+void StatBin::display(ofstream& ofs) {
 
-    ofs << "AreaGroup for cell progress: (" << min_prog << ", ";
+    ofs << data_field << " for cell progress: (" << min_prog << ", ";
     ofs << max_prog << ')' << endl;
 
     ofs << "    Total number of entries: " << values.size() << endl;
@@ -51,17 +49,22 @@ void AreaGroup::display(ofstream& ofs) {
 }
 
 /*****AreaStat Class********/
-AreaStat::AreaStat() {
+Stat::Stat() {
     this->bounds = {0.35, 0.7, 0.8, 0.9, 0.95, 0.97, 0.98, 0.99, 1.0};
-    AreaGroup* ag;
+    StatBin* sb;
     double low = 0.0;
     for (unsigned int i = 0; i < bounds.size(); i++) {
-         ag = new AreaGroup(low, bounds.at(i));
-         groups.push_back(ag);
-         low = bounds.at(i);
+        // create area bin
+        sb = new StatBin(low, bounds.at(i), "Area_Bin");
+        area.push_back(sb);
+        //create pressure bin
+        //  sb = new StatBin(low, bounds.at(i), "Pressure_Bin");
+        //  pressure.push_back(sb);
+        //update low
+        low = bounds.at(i);
     }
 }
-void AreaStat::add_values(vector<vector<Data*>>& cells) {
+void Stat::add_values(vector<vector<Data*>>& cells) {
     
     for (unsigned int i = 0; i < cells.size(); i++) {
 
@@ -73,33 +76,36 @@ void AreaStat::add_values(vector<vector<Data*>>& cells) {
             while ( (k < bounds.size()) && (p > bounds.at(k)) ) {
                 k++;
             }
-            //pass cell's area into corrent area grouping
+            //pass cell's area into correct area grouping
             double a = cells.at(i).at(j)->CellArea;
-            groups.at(k)->add_value(a);   
+            area.at(k)->add_value(a);   
+            //pass cell's pressure into correct pressure grouping
+            //   a = cells.at(i).at(j)->CellPressure;
+            //   pressure.at(k)->add_value(a);
         }
     }
 
     return;
 }
 
-void AreaStat::calc_Stats() {
+void Stat::calc_Stats() {
     
-    for (unsigned int i = 0; i < groups.size(); i++) {
-        groups.at(i)->calc_Stats();
+    for (unsigned int i = 0; i < area.size(); i++) {
+        area.at(i)->calc_Stats();
     }
 
     return;
 }
 
-void AreaStat::display() {
+void Stat::display() {
     
     ofstream ofs;
     ofs.open("Area_Stats.txt");
 
     ofs << "Statistical Data for Cell Area" << endl;
 
-    for (unsigned int i = 0; i < groups.size(); i++) {
-        groups.at(i)->display(ofs);
+    for (unsigned int i = 0; i < area.size(); i++) {
+        area.at(i)->display(ofs);
     }
 
     ofs.close();

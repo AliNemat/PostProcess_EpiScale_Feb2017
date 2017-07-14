@@ -4,14 +4,14 @@ CFLAGS=-c -Wall
 
 all: cell
 
-cell: main.o area.o
-		$(CC) main.o area.o -o cell
+cell: main.o stat.o
+		$(CC) main.o stat.o -o cell
 
 main.o: main.cpp
 		$(CC) $(CFLAGS) main.cpp
 
-area.o: area.cpp
-		$(CC) $(CFLAGS) area.cpp
+stat.o: stat.cpp
+		$(CC) $(CFLAGS) stat.cpp
 
 clean:
 		rm -rf *o exec

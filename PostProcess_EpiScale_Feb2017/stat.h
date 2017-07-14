@@ -1,8 +1,8 @@
-//area.h
+//stat.h
 //===========================
 //include guard
-#ifndef _AREA_H_INCLUDED_
-#define _AREA_H_INCLUDED_
+#ifndef _STAT_H_INCLUDED_
+#define _STAT_H_INCLUDED_
 //===========================
 //forward declare dependencies
 class Data;
@@ -14,27 +14,28 @@ class Data;
 //===========================
 using namespace std;
 
-class AreaGroup {
+class StatBin {
     private:
         double min_prog;
         double max_prog;
+        string data_field;
         double mean;
         double std_dev;
         vector <double> values;
     public:
-        AreaGroup(double min, double max);
-        double get_high_end();
+        StatBin(double min, double max, string name);
         void add_value(double val);
         void calc_Stats();
         void display(ofstream& ofs);
 };
 
-class AreaStat{
+class Stat{
     private:
-        vector <AreaGroup*> groups;
+        vector <StatBin*> area;
+        vector <StatBin*> pressure;
         vector <double> bounds;
     public:
-        AreaStat();
+        Stat();
         void add_values(vector<vector<Data*>>& cells);
         void calc_Stats();
         void display();

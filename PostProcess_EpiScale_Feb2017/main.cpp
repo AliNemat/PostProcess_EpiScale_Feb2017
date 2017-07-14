@@ -7,7 +7,7 @@
 #include <sstream>
 #include <math.h>
 #include "data.h"
-#include "area.h"
+#include "stat.h"
 
 using namespace std;
   
@@ -57,7 +57,7 @@ int main()
 
     // Computing Cell Area statistical analysis
     cout << "Compute Area stats" << endl;
-    AreaStat area;
+    Stat area;
     area.add_values(data);
     area.calc_Stats();
     area.display();

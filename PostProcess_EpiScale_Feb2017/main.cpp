@@ -56,12 +56,24 @@ int main()
     } //finished reading all the files
 
     // Computing Cell Area statistical analysis
-    cout << "Compute Area stats" << endl;
-    Stat area;
+    cout << "Compute Area Stats" << endl;
+    Area_Stat area;
     area.add_values(data);
     area.calc_Stats();
     area.display();
+    area.print_Graph_Output();
+    cout << "Area completed" << endl << endl;
+    
+    cout << "Compute Perimeter Stats" << endl;
+    Perim_Stat perim;
+    perim.add_values(data);
+    perim.calc_Stats();
+    perim.display();
+    perim.print_Graph_Output();
+    cout << "Perim completed" << endl;
+    
     cout << "Finished with everything" << endl;
+    
     return 0;
 }
 

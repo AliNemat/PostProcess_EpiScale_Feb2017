@@ -14,4 +14,4 @@ stat.o: stat.cpp
 		$(CC) $(CFLAGS) stat.cpp
 
 clean:
-		rm -rf *o exec
+		rm -rf *o cell

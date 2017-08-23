@@ -12,9 +12,12 @@
 using namespace std;
   
 bool parse_File(string, vector<Data*>&);
+void parse_Folder(string, vector<vector<Data*>>&);
 
 int main()
 {
+
+
     vector<vector<Data*>> data;
 	vector<Data*> cells;
     string Initial ("low/detailedStat_B_") ; 
@@ -96,7 +99,6 @@ int main()
     
     cout << "Finished with everything" << endl;
 
-	cout << true << ' ' << false << endl;
     return 0;
 }
 

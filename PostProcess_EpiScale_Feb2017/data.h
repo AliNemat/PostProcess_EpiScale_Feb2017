@@ -8,7 +8,7 @@ struct Data {
 	int CellRank;
 	double GrowthProgress;
 	double MembrGrowthProgress;
-	int IsBoundaryCell;
+	bool IsBoundaryCell;
 	int NumOfNeighbors;
 	double CellArea;
 	double CellPerim;

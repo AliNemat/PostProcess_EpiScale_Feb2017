@@ -17,7 +17,7 @@ int main()
 {
     vector<vector<Data*>> data;
 	vector<Data*> cells;
-    string  Initial ("detailedStat_B_") ; 
+    string Initial ("low/detailedStat_B_") ; 
     string Format (".txt"); 
     string Number;
     string FileName;
@@ -51,29 +51,52 @@ int main()
             data.push_back(cells);
             //clear temp vector for next file
             cells.clear();
-        }
+        } 
 
     } //finished reading all the files
 
+	//Bounds vectors
+	vector<double> low = {0.0, 0.5, 0.9};
+	vector<double> high = {0.9, 0.95, 0.98, 1.0};
+
     // Computing Cell Area statistical analysis
     cout << "Compute Area Stats" << endl;
-    Area_Stat area;
-    area.add_values(data);
-    area.calc_Stats();
-    area.display();
-    area.print_Graph_Output();
+	cout << "	Non mitotic" << endl;
+    Area_Stat area_low("Area_Low",low);
+    area_low.add_values(data);
+    area_low.calc_Stats();
+    area_low.display();
+    area_low.print_Graph_Output();
+
+	cout << "	Mitotic" << endl;
+	Area_Stat area_high("Area_High",high);
+	area_high.add_values(data);
+	area_high.calc_Stats();
+	area_high.display();
+	area_high.print_Graph_Output();
+	area_high.print_Raw_Data();
+
     cout << "Area completed" << endl << endl;
     
     cout << "Compute Perimeter Stats" << endl;
-    Perim_Stat perim;
-    perim.add_values(data);
-    perim.calc_Stats();
-    perim.display();
-    perim.print_Graph_Output();
+    cout << "	Non mitotic" << endl;
+	Perim_Stat perim_low("Perim_Low",low);
+    perim_low.add_values(data);
+    perim_low.calc_Stats();
+    perim_low.display();
+    perim_low.print_Graph_Output();
+	
+	cout << "	Mitotic" << endl;
+	Perim_Stat perim_high("Perim_High",high);
+    perim_high.add_values(data);
+    perim_high.calc_Stats();
+    perim_high.display();
+    perim_high.print_Graph_Output();
     cout << "Perim completed" << endl;
     
     cout << "Finished with everything" << endl;
-    
+
+	cout << true << ' ' << false << endl;
     return 0;
 }
 
@@ -124,7 +147,15 @@ bool parse_File(string FileName, vector<Data*>& cells) {
         }
         else if (temp == "    IsBoundrayCell") { //fix later
             ss >> num;
-            cell->IsBoundaryCell = num;
+			if (num == 0) {
+				cell->IsBoundaryCell = false;
+			}
+			else if (num == 1) {
+				cell->IsBoundaryCell = true;
+			}
+			else {
+				cout << "ISBOUNDARYCELL ERROR -- num = " << num << endl;
+			}
         }
         else if (temp == "    NumOfNeighbors") {
             ss >> num;

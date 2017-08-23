@@ -22,12 +22,14 @@ class StatBin {
         double std_dev;
         vector <double> values;
         vector <double> progress;
+		vector <double> z_scores;
     public:
         StatBin(double min, double max);
         void add_value(double prog, double val);
         void calc_Stats();
         void display(ofstream& ofs);
         void print_Graph(ofstream& ofs);
+		void print_Raw_Data(ofstream& ofs);
 };
 
 class Base_Stat{
@@ -36,23 +38,24 @@ class Base_Stat{
         vector <StatBin*> bins;
         vector <double> bounds;
     public:
-        Base_Stat(string data_field);
+        Base_Stat(string data_field, vector<double>& bounds);
         virtual void calc_Stats();
         virtual void display();
         virtual void print_Graph_Output();
+		virtual void print_Raw_Data();
         //Pure Virtual
         virtual void add_values(vector<vector<Data*>>& cells) = 0;
 };
 
 class Area_Stat: public Base_Stat{
     public:
-        Area_Stat();
+        Area_Stat(string datafield, vector<double>& bounds);
         virtual void add_values(vector<vector<Data*>>& cells);
 };
 
 class Perim_Stat: public Base_Stat{
     public:
-        Perim_Stat();
+        Perim_Stat(string datafield, vector<double>& bounds);
         virtual void add_values(vector<vector<Data*>>& cells);
 };
 

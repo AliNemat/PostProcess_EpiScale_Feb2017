@@ -14,6 +14,11 @@ StatBin::StatBin(double min, double max) {
     this->min_prog = min;
     this->max_prog = max;
 }
+
+double StatBin::get_mean() {
+	return mean;
+}
+
 void StatBin::add_value(double prog, double val) {
     progress.push_back(prog);
     values.push_back(val);
@@ -134,10 +139,10 @@ void Base_Stat::calc_Stats() {
     return;
 }
 
-void Base_Stat::display() {
+void Base_Stat::display(string folder) {
     
     ofstream ofs;
-    string Filename = "low/" + data_field + "_Stats.txt"; 
+    string Filename = folder + '/' + data_field + "_Stats.txt"; 
 
     ofs.open(Filename.c_str());
 
@@ -168,9 +173,9 @@ void Base_Stat::print_Graph_Output() {
     return;
 }
 
-void Base_Stat::print_Raw_Data() {
+void Base_Stat::print_Raw_Data(string folder) {
 	ofstream ofs;
-	string Filename = "low/" + data_field + "_Raw.csv";
+	string Filename = folder + '/' + data_field + "_Raw.csv";
 	ofs.open(Filename.c_str());
 
 	for (unsigned int i = 0; i < bins.size(); i++) {
@@ -178,6 +183,20 @@ void Base_Stat::print_Raw_Data() {
 	}
 
 	ofs.close();
+	return;
+}
+
+void Base_Stat::print_Simple_Graph(ofstream& ofs) {
+
+	for (unsigned int i = 0; i < bins.size(); i++) {
+		ofs << bins.at(i)->get_mean();
+		if (i < bins.size() - 1) {
+			ofs << ',';
+		}
+	}
+
+	ofs << endl;
+
 	return;
 }
 

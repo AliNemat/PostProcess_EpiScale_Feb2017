@@ -25,6 +25,7 @@ class StatBin {
 		vector <double> z_scores;
     public:
         StatBin(double min, double max);
+		double get_mean();
         void add_value(double prog, double val);
         void calc_Stats();
         void display(ofstream& ofs);
@@ -40,9 +41,10 @@ class Base_Stat{
     public:
         Base_Stat(string data_field, vector<double>& bounds);
         virtual void calc_Stats();
-        virtual void display();
+        virtual void display(string folder);
         virtual void print_Graph_Output();
-		virtual void print_Raw_Data();
+		virtual void print_Raw_Data(string folder);
+		virtual void print_Simple_Graph(ofstream& ofs);
         //Pure Virtual
         virtual void add_values(vector<vector<Data*>>& cells) = 0;
 };

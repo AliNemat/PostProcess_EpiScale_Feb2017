@@ -13,21 +13,85 @@ using namespace std;
   
 bool parse_File(string, vector<Data*>&);
 void parse_Folder(string, vector<vector<Data*>>&);
+void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
 
 int main()
 {
+	//For each stat that you want to do a calculation on:
+	//  -create ofstream for simple file output
+	//  -other helper functions create more files, but this one is for 
+	//   quick checks
+	string p_out_file = "perim_graph.csv";
+	ofstream ofs_p(p_out_file.c_str());
+	string a_out_file = "area_graph.csv";
+	ofstream ofs_a(a_out_file.c_str());
 
-
+	//Name of folders that hold data output files
+	vector<string> folders = {"Folder1", "Folder2", "Folder3"};
     vector<vector<Data*>> data;
+	
+	//Bounds vectors
+	vector<double> bounds = {0.0, 0.45, 0.85, 0.95, 0.98, 1.0};
+
+	for (unsigned int i = 0; i < folders.size(); i++) {
+		//get Data from folder
+		parse_Folder(folders.at(i), data);		
+		//calc area and perim stats
+		calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
+		data.clear();
+	}
+   
+    cout << "Finished with everything" << endl;
+
+	ofs_p.close();
+	ofs_a.close();
+
+    return 0;
+}
+
+void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim, 
+				vector<double> bounds ,vector<vector<Data*>> data) {
+
+	string filename;
+
+    // Computing Cell Area statistical analysis
+    cout << "Compute Area Stats" << endl;
+	filename = folder + "_Area";
+    Area_Stat area(filename, bounds);
+    area.add_values(data);
+    area.calc_Stats();
+    area.display(folder);
+	area.print_Raw_Data(folder);
+	area.print_Simple_Graph(ofs_area);
+
+    cout << "Area completed" << endl << endl;
+    
+    cout << "Compute Perimeter Stats" << endl;
+	
+	filename = folder + "_Perim";
+	Perim_Stat perim(filename, bounds);
+    perim.add_values(data);
+    perim.calc_Stats();
+    perim.display(folder);
+	perim.print_Raw_Data(folder);
+	perim.print_Simple_Graph(ofs_perim);
+	
+	cout << "Perim completed" << endl;
+ 
+	return;
+}
+
+void parse_Folder(string folder_name, vector<vector<Data*>>& data) {
+
 	vector<Data*> cells;
-    string Initial ("low/detailedStat_B_") ; 
+    string Initial = folder_name + "/detailedStat_B_"; 
     string Format (".txt"); 
     string Number;
     string FileName;
     int digits;
     bool Finished = false;
 
-    for (int Ti = 1; !Finished; Ti++)
+    for (int Ti = 1; (!Finished) && (Ti < 400); Ti++)
     {
         digits = ceil(log10(Ti + 1)); 
         if (digits==1 || digits == 0) {
@@ -58,49 +122,9 @@ int main()
 
     } //finished reading all the files
 
-	//Bounds vectors
-	vector<double> low = {0.0, 0.5, 0.9};
-	vector<double> high = {0.9, 0.95, 0.98, 1.0};
-
-    // Computing Cell Area statistical analysis
-    cout << "Compute Area Stats" << endl;
-	cout << "	Non mitotic" << endl;
-    Area_Stat area_low("Area_Low",low);
-    area_low.add_values(data);
-    area_low.calc_Stats();
-    area_low.display();
-    area_low.print_Graph_Output();
-
-	cout << "	Mitotic" << endl;
-	Area_Stat area_high("Area_High",high);
-	area_high.add_values(data);
-	area_high.calc_Stats();
-	area_high.display();
-	area_high.print_Graph_Output();
-	area_high.print_Raw_Data();
-
-    cout << "Area completed" << endl << endl;
-    
-    cout << "Compute Perimeter Stats" << endl;
-    cout << "	Non mitotic" << endl;
-	Perim_Stat perim_low("Perim_Low",low);
-    perim_low.add_values(data);
-    perim_low.calc_Stats();
-    perim_low.display();
-    perim_low.print_Graph_Output();
-	
-	cout << "	Mitotic" << endl;
-	Perim_Stat perim_high("Perim_High",high);
-    perim_high.add_values(data);
-    perim_high.calc_Stats();
-    perim_high.display();
-    perim_high.print_Graph_Output();
-    cout << "Perim completed" << endl;
-    
-    cout << "Finished with everything" << endl;
-
-    return 0;
+	return;
 }
+
 
 bool parse_File(string FileName, vector<Data*>& cells) {
     

@@ -12,8 +12,9 @@
 using namespace std;
   
 bool parse_File(string, vector<Data*>&);
-void parse_Folder(string, vector<vector<Data*>>&);
+void parse_Folder(string, string, vector<vector<Data*>>&);
 void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
+void PrintData( string, int, int, int , const vector <Data*> & ) ; 
 
 int main()
 {
@@ -27,20 +28,25 @@ int main()
 	ofstream ofs_a(a_out_file.c_str());
 
 	//Name of folders that hold data output files
-	vector<string> folders = {"Folder1", "Folder2", "Folder3"};
+	vector<string> folders = {"Input1/", "Input2/", "Input3/"};
     vector<vector<Data*>> data;
 	
 	//Bounds vectors
 	vector<double> bounds = {0.0, 0.45, 0.85, 0.95, 0.98, 1.0};
 
-	for (unsigned int i = 0; i < folders.size(); i++) {
+//	for (unsigned int i = 0; i < folders.size(); i++) {
 		//get Data from folder
-		parse_Folder(folders.at(i), data);		
+		int folderID=2 ; 
+		string initial="detailedStat_N03G03_"; 
+		int printTime=167 ;
+		int numPouchCells=65 ; 
+		int neglectBc=1 ; 
+		parse_Folder(folders.at(folderID), initial, data);		
 		//calc area and perim stats
-		calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
-		data.clear();
-	}
-   
+		//calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
+		//data.clear();
+//	}
+	PrintData (initial,printTime,numPouchCells,neglectBc,data.at(printTime))  ;  
     cout << "Finished with everything" << endl;
 
 	ofs_p.close();
@@ -49,6 +55,18 @@ int main()
     return 0;
 }
 
+
+
+void PrintData ( string initial,int printTime , int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
+	cout << " Print data for output file at time:" << printTime  << endl ;  
+	string fileName="R_"+initial +to_string(printTime)+".txt" ; 
+	ofstream R_Import(fileName.c_str());
+	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
+		R_Import << dataS.at(k)->CellRank<<"	"<<dataS.at(k)->CellPerim << endl ; 
+	}
+	
+	return ; 
+}
 void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim, 
 				vector<double> bounds ,vector<vector<Data*>> data) {
 
@@ -81,17 +99,18 @@ void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim,
 	return;
 }
 
-void parse_Folder(string folder_name, vector<vector<Data*>>& data) {
+void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& data) {
 
 	vector<Data*> cells;
-    string Initial = folder_name + "/detailedStat_B_"; 
+    //string Initial = folder_name + "/detailedStat_N03G02_"; 
+    //string Initial ="detailedStat_N03G02_"; 
     string Format (".txt"); 
     string Number;
     string FileName;
     int digits;
     bool Finished = false;
 
-    for (int Ti = 1; (!Finished) && (Ti < 400); Ti++)
+    for (int Ti = 0; (!Finished) && (Ti <230); Ti++)
     {
         digits = ceil(log10(Ti + 1)); 
         if (digits==1 || digits == 0) {
@@ -107,12 +126,12 @@ void parse_Folder(string folder_name, vector<vector<Data*>>& data) {
             Number = "0" + to_string(Ti);
         }
 
-		FileName = Initial + Number + Format;
+		FileName = folder_name + initial + Number + Format;
         //parse_File returns:
         //  false if it can't read file => Finished should be true
         //  true if it can read file => Finished should be false
         Finished = !parse_File(FileName,cells);
-
+		cout << "Finished reading the file "<< FileName << endl ; 
         if (!Finished) {
             //push file's cell data onto main 2d vector
             data.push_back(cells);
@@ -233,9 +252,9 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             ss >> num;
             cell->CurrentActiveMembrNodes = num;
         }
-        else if (temp == "    CellCenter") {
+        //else if (temp == "    CellCenter") {
             //for later
-        }
+       // }
 
         //clear stringstream for next input string
         ss.clear();

@@ -16,7 +16,10 @@ struct Data {
     vector<int> NumOfPointsInContactOrdered;
 	int CurrentActiveIntnlNodes;
 	int CurrentActiveMembrNodes;
-	double CellCenter[3];
+	vector <double> cellCenter ;
+	vector <double> cellBasalLoc ;
+	vector <double> cellNucLoc ;
+	vector <double> cellApicalLoc ;
 
 };
 

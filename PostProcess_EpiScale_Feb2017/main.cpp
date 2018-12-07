@@ -36,9 +36,9 @@ int main()
 
 //	for (unsigned int i = 0; i < folders.size(); i++) {
 		//get Data from folder
-		int folderID=2 ; 
-		string initial="detailedStat_N03G03_"; 
-		int printTime=167 ;
+		int folderID=1 ; 
+		string initial="detailedStat_N02G03_"; 
+		int printTime=100 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
 		parse_Folder(folders.at(folderID), initial, data);		
@@ -62,7 +62,19 @@ void PrintData ( string initial,int printTime , int numPouchCells, int neglectBc
 	string fileName="R_"+initial +to_string(printTime)+".txt" ; 
 	ofstream R_Import(fileName.c_str());
 	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
-		R_Import << dataS.at(k)->CellRank<<"	"<<dataS.at(k)->CellPerim << endl ; 
+		R_Import << dataS.at(k)->CellRank<<"	"<<dataS.at(k)->CellPerim <<"	"<< dataS.at(k)->cellCenter.at(0) <<
+																			"	"<< dataS.at(k)->cellCenter.at(1) <<
+																			"	"<< dataS.at(k)->cellCenter.at(2) << 
+																			"	"<< dataS.at(k)->cellBasalLoc.at(0) <<
+																			"	"<< dataS.at(k)->cellBasalLoc.at(1) <<
+																			"	"<< dataS.at(k)->cellBasalLoc.at(2) <<
+																			"	"<< dataS.at(k)->cellApicalLoc.at(0) <<
+																			"	"<< dataS.at(k)->cellApicalLoc.at(1) <<
+																			"	"<< dataS.at(k)->cellApicalLoc.at(2) <<
+																			"	"<< dataS.at(k)->cellNucLoc.at(0) <<
+																			"	"<< dataS.at(k)->cellNucLoc.at(1) <<
+																			"	"<< dataS.at(k)->cellNucLoc.at(2) << endl ; 
+
 	}
 	
 	return ; 
@@ -252,9 +264,71 @@ bool parse_File(string FileName, vector<Data*>& cells) {
             ss >> num;
             cell->CurrentActiveMembrNodes = num;
         }
-        //else if (temp == "    CellCenter") {
-            //for later
-       // }
+        else if (temp == "    CellCenter") {
+            vector<double> coordinates;
+            //throw away the '(' and ')'
+            getline(ss,temp,'(');
+            getline(ss,temp,')');
+            ss.clear();
+            ss.str(temp);
+			string token ; 
+			//while ( getline (ss, token, ',') && !ss.eof()) {
+			while ( getline (ss, token, ',') ) {
+				val=stod(token) ;
+            	coordinates.push_back(val);
+				
+			}
+            cell->cellCenter = coordinates;
+        }
+		else if (temp == "    CellApicalLoc") {
+            vector<double> coordinates;
+            //throw away the '(' and ')'
+            getline(ss,temp,'(');
+            getline(ss,temp,')');
+            ss.clear();
+            ss.str(temp);
+			string token ; 
+			//while ( getline (ss, token, ',') && !ss.eof()) {
+			while ( getline (ss, token, ',') ) {
+				val=stod(token) ;
+            	coordinates.push_back(val);
+				
+			}
+            cell->cellApicalLoc = coordinates;
+        }
+		else if (temp == "    CellBasalLoc") {
+            vector<double> coordinates;
+            //throw away the '(' and ')'
+            getline(ss,temp,'(');
+            getline(ss,temp,')');
+            ss.clear();
+            ss.str(temp);
+			string token ; 
+			//while ( getline (ss, token, ',') && !ss.eof()) {
+			while ( getline (ss, token, ',') ) {
+				val=stod(token) ;
+            	coordinates.push_back(val);
+				
+			}
+            cell->cellBasalLoc = coordinates;
+        }
+		else if (temp == "    CellNucleusLoc") {
+            vector<double> coordinates;
+            //throw away the '(' and ')'
+            getline(ss,temp,'(');
+            getline(ss,temp,')');
+            ss.clear();
+            ss.str(temp);
+			string token ; 
+			//while ( getline (ss, token, ',') && !ss.eof()) {
+			while ( getline (ss, token, ',') ) {
+				val=stod(token) ;
+            	coordinates.push_back(val);
+				
+			}
+            cell->cellNucLoc = coordinates;
+        }
+
 
         //clear stringstream for next input string
         ss.clear();

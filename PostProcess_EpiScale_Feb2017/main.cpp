@@ -36,9 +36,9 @@ int main()
 
 //	for (unsigned int i = 0; i < folders.size(); i++) {
 		//get Data from folder
-		int folderID=1 ; 
-		string initial="detailedStat_N02G03_"; 
-		int printTime=100 ;
+		int folderID=2 ; 
+		string initial="detailedStat_N03G01_"; 
+		int printTime=150 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
 		parse_Folder(folders.at(folderID), initial, data);		

@@ -1,1 +1,1 @@
-Just to keep the folder in github.
+This dummy file exists in order to keep animation folder recognized by git

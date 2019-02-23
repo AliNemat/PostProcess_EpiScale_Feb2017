@@ -8,13 +8,14 @@
 #include <math.h>
 #include "data.h"
 #include "stat.h"
-
+#include <iomanip>
 using namespace std;
   
 bool parse_File(string, vector<Data*>&);
-void parse_Folder(string, string, vector<vector<Data*>>&);
+void parse_Folder(string, string, vector<vector<Data*>>&,  int, int);
 void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
-void PrintData( string, int, int, int , const vector <Data*> & ) ; 
+void PrintNucleusAndHeight( string, int, int, int , const vector <Data*> &) ; 
+void PrintCurvatureSeries( string, int, int, const vector<vector <Data*>> &) ; 
 
 int main()
 {
@@ -36,17 +37,20 @@ int main()
 
 //	for (unsigned int i = 0; i < folders.size(); i++) {
 		//get Data from folder
-		int folderID=2 ; 
-		string initial="detailedStat_N03G01_"; 
-		int printTime=150 ;
+		int folderID=2 ;  // It starts from zero 
+		string initial="detailedStat_N03G02_";
+		int firstFileID=1 ;
+		int lastFileID=400 ; 
+		int printTime=375 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
-		parse_Folder(folders.at(folderID), initial, data);		
+		parse_Folder(folders.at(folderID), initial, data, firstFileID, lastFileID);		
 		//calc area and perim stats
 		//calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
 		//data.clear();
 //	}
-	PrintData (initial,printTime,numPouchCells,neglectBc,data.at(printTime))  ;  
+	PrintNucleusAndHeight(initial,printTime,numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
+	PrintCurvatureSeries (initial,firstFileID, lastFileID, data )  ;  
     cout << "Finished with everything" << endl;
 
 	ofs_p.close();
@@ -57,10 +61,11 @@ int main()
 
 
 
-void PrintData ( string initial,int printTime , int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
-	cout << " Print data for output file at time:" << printTime  << endl ;  
+void PrintNucleusAndHeight ( string initial,int printTime , int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
+	cout << " Print data for output file at time:" << printTime  <<" for R"<< endl ;  
 	string fileName="R_"+initial +to_string(printTime)+".txt" ; 
 	ofstream R_Import(fileName.c_str());
+
 	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
 		R_Import << dataS.at(k)->CellRank<<"	"<<dataS.at(k)->CellPerim <<"	"<< dataS.at(k)->cellCenter.at(0) <<
 																			"	"<< dataS.at(k)->cellCenter.at(1) <<
@@ -77,6 +82,23 @@ void PrintData ( string initial,int printTime , int numPouchCells, int neglectBc
 
 	}
 	
+	return ; 
+}
+
+void PrintCurvatureSeries ( string initial,int firstFileID, int lastFileID, const vector<vector <Data*>> & data) {
+	for ( int i=0 ; i<data.size () ; i++) {
+		string fileName="Matlab_"+initial +to_string(i+firstFileID)+".txt" ; 
+		ofstream Matlab_Import(fileName.c_str());
+		Matlab_Import << fixed << setprecision(4) << endl ; 
+		for ( int j=0; j<data[i].size(); j++) {   
+			Matlab_Import << data[i][j]->CellRank<<"    "<< data[i][j] ->cellBasalLoc.at(0) <<
+											       "    "<< data[i][j] ->cellBasalLoc.at(1) <<
+												   "    "<< data[i][j] ->cellBasalLoc.at(2) << endl ; 
+		}
+	}
+	cout << "The number of files in the range of " <<firstFileID << " and " << lastFileID<< " which the data output file is not available is equal to: " <<
+	lastFileID-firstFileID-data.size() << endl ; 
+
 	return ; 
 }
 void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim, 
@@ -111,7 +133,7 @@ void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim,
 	return;
 }
 
-void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& data) {
+void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& data, int firstFileID, int lastFileID) {
 
 	vector<Data*> cells;
     //string Initial = folder_name + "/detailedStat_N03G02_"; 
@@ -122,7 +144,7 @@ void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& dat
     int digits;
     bool Finished = false;
 
-    for (int Ti = 0; (!Finished) && (Ti <230); Ti++)
+    for (int Ti = firstFileID; Ti <lastFileID ; Ti++)  
     {
         digits = ceil(log10(Ti + 1)); 
         if (digits==1 || digits == 0) {
@@ -144,15 +166,16 @@ void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& dat
         //  true if it can read file => Finished should be false
         Finished = !parse_File(FileName,cells);
 		cout << "Finished reading the file "<< FileName << endl ; 
-        if (!Finished) {
+        if (!Finished) { // if the data of the next file is available write it, otherwise go to read the next file.
             //push file's cell data onto main 2d vector
-            data.push_back(cells);
+            data.push_back(cells);  //push back one file data
             //clear temp vector for next file
             cells.clear();
         } 
 
-    } //finished reading all the files
-
+    } 
+	cout << "finished reading all the files" << endl ; 
+       
 	return;
 }
 
@@ -336,7 +359,7 @@ bool parse_File(string FileName, vector<Data*>& cells) {
     } //finished reading one file
 
     ifs.close();
-
+    cout << " Inside the function parse file " << endl ; 
     return true;
 }
 

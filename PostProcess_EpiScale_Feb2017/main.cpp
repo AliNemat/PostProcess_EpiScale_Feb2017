@@ -165,9 +165,9 @@ void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& dat
         //  false if it can't read file => Finished should be true
         //  true if it can read file => Finished should be false
         Finished = !parse_File(FileName,cells);
-		cout << "Finished reading the file "<< FileName << endl ; 
         if (!Finished) { // if the data of the next file is available write it, otherwise go to read the next file.
             //push file's cell data onto main 2d vector
+			cout << "Finished reading the file "<< FileName << endl ; 
             data.push_back(cells);  //push back one file data
             //clear temp vector for next file
             cells.clear();

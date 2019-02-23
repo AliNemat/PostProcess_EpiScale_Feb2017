@@ -12,7 +12,7 @@
 using namespace std;
   
 bool parse_File(string, vector<Data*>&);
-void parse_Folder(string, string, vector<vector<Data*>>&,  int, int);
+vector<string> parse_Folder(string, string, vector<vector<Data*>>&,  int, int);
 void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
 void PrintNucleusAndHeight( string, int, int, int , const vector <Data*> &) ; 
 void PrintCurvatureSeries( string, int, int, const vector<vector <Data*>> &) ; 
@@ -31,6 +31,7 @@ int main()
 	//Name of folders that hold data output files
 	vector<string> folders = {"Input1/", "Input2/", "Input3/"};
     vector<vector<Data*>> data;
+	vector<string> noAvailFileNames ; 
 	
 	//Bounds vectors
 	vector<double> bounds = {0.0, 0.45, 0.85, 0.95, 0.98, 1.0};
@@ -44,7 +45,7 @@ int main()
 		int printTime=375 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
-		parse_Folder(folders.at(folderID), initial, data, firstFileID, lastFileID);		
+		noAvailFileNames= parse_Folder(folders.at(folderID), initial, data, firstFileID, lastFileID);		
 		//calc area and perim stats
 		//calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
 		//data.clear();
@@ -52,6 +53,10 @@ int main()
 	PrintNucleusAndHeight(initial,printTime,numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
 	PrintCurvatureSeries (initial,firstFileID, lastFileID, data )  ;  
     cout << "Finished with everything" << endl;
+	cout << "Name of not available files are: " << endl ; 
+	for (int i=0 ; i<noAvailFileNames.size() ; i++) {
+		cout << i+1 <<"-"<<noAvailFileNames.at(i) << endl ; 
+	}
 
 	ofs_p.close();
 	ofs_a.close();
@@ -133,14 +138,17 @@ void calc_Stats(string folder, ofstream& ofs_area, ofstream& ofs_perim,
 	return;
 }
 
-void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& data, int firstFileID, int lastFileID) {
+vector<string> parse_Folder(string folder_name, string initial, vector<vector<Data*>>& data, int firstFileID, int lastFileID) {
 
 	vector<Data*> cells;
+
     //string Initial = folder_name + "/detailedStat_N03G02_"; 
     //string Initial ="detailedStat_N03G02_"; 
     string Format (".txt"); 
     string Number;
     string FileName;
+	vector <string> noAvailFileNames ; 
+	noAvailFileNames.clear() ; 
     int digits;
     bool Finished = false;
 
@@ -172,11 +180,14 @@ void parse_Folder(string folder_name, string initial, vector<vector<Data*>>& dat
             //clear temp vector for next file
             cells.clear();
         } 
+		else {
+			noAvailFileNames.push_back(FileName) ; 
+		}
 
     } 
 	cout << "finished reading all the files" << endl ; 
        
-	return;
+	return noAvailFileNames ; 
 }
 
 

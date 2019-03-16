@@ -9,6 +9,10 @@
 #include "data.h"
 #include "stat.h"
 #include <iomanip>
+#include <iomanip>
+#include <numeric>
+#include <functional>
+#include <algorithm>
 using namespace std;
   
 bool parse_File(string, vector<Data*>&);
@@ -16,6 +20,8 @@ vector<string> parse_Folder(string, string, vector<vector<Data*>>&,  int, int);
 void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
 void PrintNucleusAndHeight( string, int, int, int , const vector <Data*> &) ; 
 void PrintCurvatureSeries( string, int, int, const vector<vector <Data*>> &) ; 
+double distance ( double, double , double, double) ; 
+void CalAndPrintMean(int, int , const vector <Data*> &) ; 
 
 int main()
 {
@@ -39,10 +45,10 @@ int main()
 //	for (unsigned int i = 0; i < folders.size(); i++) {
 		//get Data from folder
 		int folderID=2 ;  // It starts from zero 
-		string initial="detailedStat_N03G02_";
+		string initial="detailedStat_N03G01_";
 		int firstFileID=1 ;
-		int lastFileID=400 ; 
-		int printTime=375 ;
+		int lastFileID=165 ; 
+		int printTime=164 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
 		noAvailFileNames= parse_Folder(folders.at(folderID), initial, data, firstFileID, lastFileID);		
@@ -51,6 +57,7 @@ int main()
 		//data.clear();
 //	}
 	PrintNucleusAndHeight(initial,printTime,numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
+	CalAndPrintMean(numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
 	PrintCurvatureSeries (initial,firstFileID, lastFileID, data )  ;  
     cout << "Finished with everything" << endl;
 	cout << "Name of not available files are: " << endl ; 
@@ -70,22 +77,55 @@ void PrintNucleusAndHeight ( string initial,int printTime , int numPouchCells, i
 	cout << " Print data for output file at time:" << printTime  <<" for R"<< endl ;  
 	string fileName="R_"+initial +to_string(printTime)+".txt" ; 
 	ofstream R_Import(fileName.c_str());
-
+	R_Import <<
+			   "Perime"<<"	"<<
+			   "CentrX"<<"	"<<
+	           "CentrY"<<"	"<<
+			   "BasalX"<<"	"<< 
+			   "BasalY"<<"	"<< 
+			   "ApicaX"<<"	"<< 
+			   "ApicaY"<<"	"<< 
+			   "NucleX"<<"	"<<	 
+			   "NucleY"<<endl ; 
+	
+	R_Import << fixed << setprecision(4) << endl ; 
 	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
-		R_Import << dataS.at(k)->CellRank<<"	"<<dataS.at(k)->CellPerim <<"	"<< dataS.at(k)->cellCenter.at(0) <<
+		R_Import 								 <<dataS.at(k)->CellPerim <<"	"<< dataS.at(k)->cellCenter.at(0) <<
 																			"	"<< dataS.at(k)->cellCenter.at(1) <<
-																			"	"<< dataS.at(k)->cellCenter.at(2) << 
 																			"	"<< dataS.at(k)->cellBasalLoc.at(0) <<
 																			"	"<< dataS.at(k)->cellBasalLoc.at(1) <<
-																			"	"<< dataS.at(k)->cellBasalLoc.at(2) <<
 																			"	"<< dataS.at(k)->cellApicalLoc.at(0) <<
 																			"	"<< dataS.at(k)->cellApicalLoc.at(1) <<
-																			"	"<< dataS.at(k)->cellApicalLoc.at(2) <<
 																			"	"<< dataS.at(k)->cellNucLoc.at(0) <<
-																			"	"<< dataS.at(k)->cellNucLoc.at(1) <<
-																			"	"<< dataS.at(k)->cellNucLoc.at(2) << endl ; 
+																			"	"<< dataS.at(k)->cellNucLoc.at(1) << endl ; 
 
 	}
+	
+	return ; 
+}
+
+void CalAndPrintMean ( int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
+
+	std::vector<double>  cellHeight, nucDist, nucLocPercent ; 
+	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
+		cellHeight.push_back(distance ( dataS.at(k)->cellApicalLoc.at(0)  ,dataS.at(k)->cellApicalLoc.at(1), 
+	                                    dataS.at(k)->cellBasalLoc.at(0)   ,dataS.at(k)->cellBasalLoc.at(1)
+								      )
+							) ; 
+		nucDist.push_back(distance ( dataS.at(k)->cellCenter.at(0)  ,dataS.at(k)->cellCenter.at(1), 
+	    	              			 dataS.at(k)->cellBasalLoc.at(0),dataS.at(k)->cellBasalLoc.at(1)
+									) 
+					   	)	; 
+	}
+
+	nucLocPercent.resize ( cellHeight.size()); // alloc space
+	transform ( nucDist.begin(),nucDist.end(),cellHeight.begin(), nucLocPercent.begin(),std::divides<double>() ); 
+	double cellHeightAvg   =accumulate (cellHeight.begin(), cellHeight.end(),0.0)/cellHeight.size() ; 
+	double nucLocPercentAvg=accumulate (nucLocPercent.begin(), nucLocPercent.end(),0.0)/nucLocPercent.size() ;  
+
+	cout << "Mean value for pouch cells height is: "<< cellHeightAvg << endl; 
+	cout << "Mean value for pouch cells nucleus position is: "<< nucLocPercentAvg << endl; 
+
 	
 	return ; 
 }
@@ -374,4 +414,9 @@ bool parse_File(string FileName, vector<Data*>& cells) {
     return true;
 }
 
+double distance ( double x1, double y1, double x2, double y2)  {
+
+return ( sqrt ( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ) ) ;  
+
+}
 

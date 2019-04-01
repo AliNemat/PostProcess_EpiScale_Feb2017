@@ -18,8 +18,8 @@ using namespace std;
 bool parse_File(string, vector<Data*>&);
 vector<string> parse_Folder(string, string, vector<vector<Data*>>&,  int, int);
 void calc_Stats(string, ofstream&, ofstream&, vector<double> bounds, vector<vector<Data*>>);
-void PrintNucleusAndHeight( string, int, int, int , const vector <Data*> &) ; 
-void PrintCurvatureSeries( string, int, int, const vector<vector <Data*>> &) ; 
+void PrintNucleusAndHeight( string, int, int, int , const vector <Data*> &, string) ; 
+void PrintCurvatureSeries( string, int, int, const vector<vector <Data*>> &,string) ; 
 double distance ( double, double , double, double) ; 
 void CalAndPrintMean(int, int , const vector <Data*> &) ; 
 
@@ -36,6 +36,7 @@ int main()
 
 	//Name of folders that hold data output files
 	vector<string> folders = {"Input1/", "Input2/", "Input3/"};
+	vector<string> outputFolders = {"Output/Output1/", "Output/Output2/", "Output/Output3/"};
     vector<vector<Data*>> data;
 	vector<string> noAvailFileNames ; 
 	
@@ -47,8 +48,8 @@ int main()
 		int folderID=2 ;  // It starts from zero 
 		string initial="detailedStat_N03G01_";
 		int firstFileID=1 ;
-		int lastFileID=165 ; 
-		int printTime=164 ;
+		int lastFileID=350 ; 
+		int printTime=349 ;
 		int numPouchCells=65 ; 
 		int neglectBc=1 ; 
 		noAvailFileNames= parse_Folder(folders.at(folderID), initial, data, firstFileID, lastFileID);		
@@ -56,9 +57,9 @@ int main()
 		//calc_Stats(folders.at(i), ofs_a, ofs_p, bounds, data);
 		//data.clear();
 //	}
-	PrintNucleusAndHeight(initial,printTime,numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
+	PrintNucleusAndHeight(initial,printTime,numPouchCells,neglectBc,data.at(printTime- firstFileID),outputFolders.at(folderID) )  ;  
 	CalAndPrintMean(numPouchCells,neglectBc,data.at(printTime- firstFileID) )  ;  
-	PrintCurvatureSeries (initial,firstFileID, lastFileID, data )  ;  
+	PrintCurvatureSeries (initial,firstFileID, lastFileID, data,outputFolders.at(folderID)  )  ;  
     cout << "Finished with everything" << endl;
 	cout << "Name of not available files are: " << endl ; 
 	for (int i=0 ; i<noAvailFileNames.size() ; i++) {
@@ -73,9 +74,9 @@ int main()
 
 
 
-void PrintNucleusAndHeight ( string initial,int printTime , int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
+void PrintNucleusAndHeight ( string initial,int printTime , int numPouchCells, int neglectBc,const vector <Data*> & dataS , string outputFolder) {
 	cout << " Print data for output file at time:" << printTime  <<" for R"<< endl ;  
-	string fileName="R_"+initial +to_string(printTime)+".txt" ; 
+	string fileName=outputFolder+"R_"+initial +to_string(printTime)+".txt" ; 
 	ofstream R_Import(fileName.c_str());
 	R_Import <<
 			   "Perime"<<"	"<<
@@ -106,20 +107,24 @@ void PrintNucleusAndHeight ( string initial,int printTime , int numPouchCells, i
 
 void CalAndPrintMean ( int numPouchCells, int neglectBc,const vector <Data*> & dataS) {
 
-	std::vector<double>  cellHeight, nucDist, nucLocPercent ; 
+	std::vector<double>  cellHeight, nucDistBasal, nucDistApical,nucLocPercent ; 
 	for ( int k=0+neglectBc ; k<numPouchCells-neglectBc ; k++) {
-		cellHeight.push_back(distance ( dataS.at(k)->cellApicalLoc.at(0)  ,dataS.at(k)->cellApicalLoc.at(1), 
-	                                    dataS.at(k)->cellBasalLoc.at(0)   ,dataS.at(k)->cellBasalLoc.at(1)
+		nucDistApical.push_back(distance ( dataS.at(k)->cellApicalLoc.at(0)  ,dataS.at(k)->cellApicalLoc.at(1), 
+	                                       dataS.at(k)->cellNucLoc.at(0)     ,dataS.at(k)->cellNucLoc.at(1)
 								      )
 							) ; 
-		nucDist.push_back(distance ( dataS.at(k)->cellCenter.at(0)  ,dataS.at(k)->cellCenter.at(1), 
-	    	              			 dataS.at(k)->cellBasalLoc.at(0),dataS.at(k)->cellBasalLoc.at(1)
-									) 
+		nucDistBasal.push_back(distance ( dataS.at(k)->cellNucLoc.at(0)  ,dataS.at(k)->cellNucLoc.at(1), 
+	    	              			      dataS.at(k)->cellBasalLoc.at(0),dataS.at(k)->cellBasalLoc.at(1)
+									    ) 
 					   	)	; 
 	}
 
+	cellHeight.resize ( nucDistBasal.size()); // alloc space
+	transform ( nucDistApical.begin(),nucDistApical.end(),nucDistBasal.begin(), cellHeight.begin(),std::plus<double>() );
+
 	nucLocPercent.resize ( cellHeight.size()); // alloc space
-	transform ( nucDist.begin(),nucDist.end(),cellHeight.begin(), nucLocPercent.begin(),std::divides<double>() ); 
+	transform ( nucDistBasal.begin(),nucDistBasal.end(),cellHeight.begin(), nucLocPercent.begin(),std::divides<double>() ); 
+
 	double cellHeightAvg   =accumulate (cellHeight.begin(), cellHeight.end(),0.0)/cellHeight.size() ; 
 	double nucLocPercentAvg=accumulate (nucLocPercent.begin(), nucLocPercent.end(),0.0)/nucLocPercent.size() ;  
 
@@ -130,9 +135,9 @@ void CalAndPrintMean ( int numPouchCells, int neglectBc,const vector <Data*> & d
 	return ; 
 }
 
-void PrintCurvatureSeries ( string initial,int firstFileID, int lastFileID, const vector<vector <Data*>> & data) {
+void PrintCurvatureSeries ( string initial,int firstFileID, int lastFileID, const vector<vector <Data*>> & data,string outputFolder) {
 	for ( int i=0 ; i<data.size () ; i++) {
-		string fileName="Matlab_"+initial +to_string(i+firstFileID)+".txt" ; 
+		string fileName=outputFolder+"Matlab_"+initial +to_string(i+firstFileID)+".txt" ; 
 		ofstream Matlab_Import(fileName.c_str());
 		Matlab_Import << fixed << setprecision(4) << endl ; 
 		for ( int j=0; j<data[i].size(); j++) {   
